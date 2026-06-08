@@ -66,14 +66,23 @@ app.use(errorHandler);
 
 // Set Port and Start Server
 const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`\x1b[36m[Server] Running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}\x1b[0m`);
-});
+let server;
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  server = app.listen(PORT, () => {
+    console.log(`\x1b[36m[Server] Running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}\x1b[0m`);
+  });
+}
 
 // Handle unhandled promise rejections outside Express
 process.on('unhandledRejection', (err) => {
   console.error(`\x1b[31m[Unhandled Rejection] Shutting down: ${err.message}\x1b[0m`);
-  server.close(() => {
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
     process.exit(1);
-  });
+  }
 });
+
+module.exports = app;
