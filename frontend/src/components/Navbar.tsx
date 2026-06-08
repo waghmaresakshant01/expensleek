@@ -1,6 +1,7 @@
 import LogoIcon from './LogoIcon'
 
 export type SubView = 'dashboard' | 'goals' | 'settings'
+export type LandingPage = 'home' | 'features' | 'analytics' | 'insights' | 'help' | 'news'
 
 interface NavbarProps {
   onLaunchApp: () => void
@@ -8,7 +9,17 @@ interface NavbarProps {
   onBackToHome: () => void
   subView?: SubView
   onChangeSubView?: (view: SubView) => void
+  landingPage?: LandingPage
+  onNavLink?: (page: LandingPage) => void
 }
+
+const landingNavLinks: { label: string; page: LandingPage }[] = [
+  { label: 'Features', page: 'features' },
+  { label: 'Analytics', page: 'analytics' },
+  { label: 'Insights', page: 'insights' },
+  { label: 'Help', page: 'help' },
+  { label: 'News', page: 'news' },
+]
 
 export default function Navbar({
   onLaunchApp,
@@ -16,14 +27,33 @@ export default function Navbar({
   onBackToHome,
   subView = 'dashboard',
   onChangeSubView,
+  landingPage = 'home',
+  onNavLink,
 }: NavbarProps) {
+  const handleNavLink = (page: LandingPage) => {
+    if (page === 'features') {
+      // Scroll to the features section on the landing page
+      if (isDashboard) {
+        onBackToHome()
+        setTimeout(() => {
+          document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+        }, 100)
+      } else {
+        document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })
+      }
+      onNavLink?.('home')
+    } else {
+      onNavLink?.(page)
+    }
+  }
+
   return (
     <nav className="absolute top-0 left-0 right-0 z-20 px-6 py-5">
       <div className="flex items-center justify-between max-w-[88rem] mx-auto">
         {/* Left: Logo */}
         <div
           className="flex items-center gap-2 cursor-pointer"
-          onClick={isDashboard ? onBackToHome : undefined}
+          onClick={() => { onBackToHome(); onNavLink?.('home') }}
         >
           <LogoIcon className="w-7 h-7 text-black" />
           <span className="text-2xl font-medium tracking-tight text-black">
@@ -34,14 +64,21 @@ export default function Navbar({
         {/* Center: Nav links */}
         {!isDashboard ? (
           <div className="hidden md:flex items-center gap-8">
-            {['Features', 'Analytics', 'Insights', 'Help', 'News'].map((link) => (
-              <a
-                key={link}
-                href="#"
-                className="text-base text-gray-700 hover:text-black font-medium transition-colors duration-200"
+            {landingNavLinks.map(({ label, page }) => (
+              <button
+                key={label}
+                onClick={() => handleNavLink(page)}
+                className={`text-base font-medium transition-colors duration-200 relative group ${
+                  landingPage === page && page !== 'home'
+                    ? 'text-black'
+                    : 'text-gray-600 hover:text-black'
+                }`}
               >
-                {link}
-              </a>
+                {label}
+                {landingPage === page && page !== 'home' && (
+                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-black rounded-full" />
+                )}
+              </button>
             ))}
           </div>
         ) : (
@@ -69,7 +106,7 @@ export default function Navbar({
         {/* Right: CTA */}
         {isDashboard ? (
           <button
-            onClick={onBackToHome}
+            onClick={() => { onBackToHome(); onNavLink?.('home') }}
             className="bg-black/5 text-black text-base font-medium px-7 py-2.5 rounded-full hover:bg-black/10 transition-colors duration-200 border border-black/5"
           >
             Back to Home

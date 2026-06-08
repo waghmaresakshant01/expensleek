@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Navbar from './components/Navbar'
-import type { SubView } from './components/Navbar'
+import type { SubView, LandingPage } from './components/Navbar'
 import HeroSection from './components/HeroSection'
 import InfoSection from './components/InfoSection'
 import BackedBySection from './components/BackedBySection'
@@ -15,15 +15,24 @@ import TestimonialsSection from './components/TestimonialsSection'
 import FAQSection from './components/FAQSection'
 import CTABanner from './components/CTABanner'
 
+import AnalyticsView from './components/AnalyticsView'
+import InsightsView from './components/InsightsView'
+import HelpView from './components/HelpView'
+import NewsView from './components/NewsView'
+
 export default function App() {
   const [view, setView] = useState<'landing' | 'dashboard'>('landing')
   const [subView, setSubView] = useState<SubView>('dashboard')
+  const [landingPage, setLandingPage] = useState<LandingPage>('home')
 
   const launchApp = () => {
     setView('dashboard')
     setSubView('dashboard')
   }
-  const goHome = () => setView('landing')
+  const goHome = () => {
+    setView('landing')
+    setLandingPage('home')
+  }
 
   const handleClearData = async () => {
     try {
@@ -41,23 +50,34 @@ export default function App() {
         onBackToHome={goHome}
         subView={subView}
         onChangeSubView={setSubView}
+        landingPage={landingPage}
+        onNavLink={setLandingPage}
       />
 
       {view === 'landing' ? (
         <>
-          {/* Hero: full-screen wrapper */}
-          <div className="h-screen flex flex-col overflow-hidden">
-            <HeroSection onLaunchApp={launchApp} />
-          </div>
+          {landingPage === 'home' && (
+            <>
+              {/* Hero: full-screen wrapper */}
+              <div className="h-screen flex flex-col overflow-hidden">
+                <HeroSection onLaunchApp={launchApp} />
+              </div>
 
-          <InfoSection />
-          <BackedBySection />
-          <UseCasesSection />
-          <HowItWorksSection />
-          <StatsSection />
-          <TestimonialsSection />
-          <FAQSection />
-          <CTABanner onLaunchApp={launchApp} />
+              <InfoSection />
+              <BackedBySection />
+              <UseCasesSection />
+              <HowItWorksSection />
+              <StatsSection />
+              <TestimonialsSection />
+              <FAQSection />
+              <CTABanner onLaunchApp={launchApp} />
+            </>
+          )}
+
+          {landingPage === 'analytics' && <AnalyticsView />}
+          {landingPage === 'insights' && <InsightsView />}
+          {landingPage === 'help' && <HelpView />}
+          {landingPage === 'news' && <NewsView />}
 
           {/* Footer */}
           <footer className="bg-[#F5F5F5] border-t border-black/5 py-12 px-6">
@@ -81,3 +101,4 @@ export default function App() {
     </div>
   )
 }
+
